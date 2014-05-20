@@ -12,7 +12,7 @@ I began writing the application that runs this blog on 2008-01-13, shortly after
 
 Try it yourself! It's really fun to work with Camping - but only if you know "Ruby":http://ruby-lang.org.
 
-The name derives simply from "my":/murphy initials, KK.
+The name derives simply from "my":http://murfy.de/murphy initials, KK.
 
 h2. The Golden Rule of blokk
 
