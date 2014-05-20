@@ -1,0 +1,2 @@
+require './blokk'
+run Blokk
