@@ -1,0 +1,103 @@
+h1. blokk
+
+My blog, built with Camping. 318 lines of code.
+
+h2. History
+
+!{float: right; border: none}http://camping.rubyforge.org/Camping.gif!:http://camping.rubyforge.org/
+
+I began writing the application that runs this blog on 2008-01-13, shortly after exploring "Camping":http://camping.rubyforge.org/, _why's extremely small web framework (which has only 4KB of code). I was amazed how easy it is to create a web application with it.
+
+----
+
+@blokk@ is derived from the "original blog.rb example":http://code.whytheluckystiff.net/camping/browser/trunk/examples/blog.rb.
+
+Try it yourself! It's really fun to work with Camping - but only if you know "Ruby":http://ruby-lang.org.
+
+The name derives simply from "my":/murphy initials, KK.
+
+h2. The Golden Rule of blokk
+
+Somehow, I decided to keep @blokk@ at *318 lines of code* (that's without empty lines and comments).
+318 is one of my favourite numbers (the other being 308).
+
+h2. Download
+
+* "blokk":http://murfy.de/blokk.rb - the application that you see running.
+* "blokk in color":http://murfy.de/blokk.rb.html - highlighted with "CodeRay":http://coderay.rubychan.de.
+* "feed":http://murfy.de/feed.rb - a 17-LOC library to simplify RSS feed generation (build on top of Ruby's "rss":http://www.ruby-doc.org/stdlib/libdoc/rss/rdoc/index.html lib.)
+* "validate_size":http://murfy.de/validate_size.sh - counts the lines of code for blokk.rb. Returns 318.
+
+h2. Development & Support
+
+We have a "Redmine":http://code.licenser.net/projects/show/blokk project for blokk running on code.licenser.net.
+
+h2. Features
+
+"blokk 0.998":http://murfy.de/blokk.rb includes the following features:
+
+* Read and write simple *articles* with title and body.
+* To edit and delete posts, you have to *login*. Username and password are set while migrating.
+* Everybody can add *comments* (currently plain text only).
+* *Cookies* are only used when you try to login (I hate it when pages send me cookies for no reason.)
+* Posts and comments remember their *creating time* and are ordered chronologically.
+* Posts have *tags* and can be viewed by selecting a tag from the *menu bar*.
+* Posts have a *nickname* for clean and prett URLs.
+* *Textile* is used for the posts.
+* Comments are protected from *spambots* with a bit of JavaScript.
+* Comments can also be *deleted* by the admin.
+* Of course, it has a *CSS* template.
+* It looks nice in *elinks*, too!
+* The site is *valid XHTML*. I also indented the output ("Markaby's":http://markaby.rubyforge.org/ default output looks horrible!)
+* *Errors* that prevent a comment or post from being saved are pointed out with red labels.
+* Post previews (*excerpts*)
+* *RSS feeds* for
+** posts: only for a specific tag or for all tags
+** comments
+* *Pretty URLs* (e.g. the path to this post is just @/blokk@) using nicknames
+* *Access keys* for keyboard lovers
+* *Source code highlighting* using CodeRay
+
+h2. Changelog
+
+* @[0.94]@ It is possible to split a post into *excerpt* and full content. In the index, only the excerpt is shown.
+* @[0.95]@ You can link to an article with a really short URL now: @/<nickname>@.
+* @[0.96]@ *Access keys* added, and nicknames can include dashes now.
+* @[0.97]@ *Comment size* is checked to be < 3000 chars.
+* @[0.97]@ *RSS feeds*! Really :)
+* @[0.97]@ *Page titles* when reading a post (makes bookmarking nicer.)
+* @[0.98]@ Fixed: Comments are *wrapped* to fit into the box
+* @[0.98]@ Fixed: Nicknames can include *Unicode* characters.
+* @[0.98]@ New: Show all articles with @/all@.
+* @[0.99]@ New: Automatic tag setting when creating a new article.
+* @[0.99]@ New: A logo in the header.
+* @[0.99]@ Fixed: E access key only available in single-post view.
+* @[0.991]@ Layout: The whole title is one single link.
+* @[0.991]@ RSS feed link links to current tag.
+* @[0.991]@ RSS feed is served with correct Content-Type.
+* @[0.991]@ RSS feed converts Textile to HTML.
+* @[0.991]@ RSS feed has an image now.
+* @[0.992]@ "Fixed login":/camping-sessions-fix.
+* @[0.993]@ Fixed login, again.
+* @[0.994]@ Highlighting using @coderay/for_redcloth@.
+* @[0.995]@ Xmas-style, added a link to old style as an alternate stylesheet.
+* @[0.996]@ Using XHTML 1.0 Transitional now.
+* @[0.996]@ Fixed tag bug (tag "me" also matched "anime", see ticket "#93":http://redmine.rubychan.de/issues/show/93)
+* @[0.996]@ Code cleanup; using new ActiveRecord::Base methods @#all@ and @#first@.
+* @[0.997]@ Comment feed (under @/rss/comments@)
+* @[0.997]@ Fixed: The current tag is used for new and the post feed URL.
+* @[0.997]@ Fixed: "Read / Lesen" now works as supposed to.
+* @[0.998]@ Slogan (below the header), configurable via @slogan.txt@.
+
+h2. Planned features
+
+* *Textile for comments* (I couldn't make it safe yet. The internet is a creepy place. Maybe with RedCloth 4?)
+** *Preview for comments*: Textile will make it necessary.
+
+h2. Features +not+ planned
+
+* *Language detection*: -Would be really nice.- Most people seem to be annoyed by automatic language selection.
+* *Search*: Just use "Google":http://www.google.com/search?q=site:murfy.de.
+* *AJAX*: Although I like it very much, I want to keep this simple, also for visitors that have a slow connection or no eyes or whatever.
+* *Preview for posts*: From my experience, I find most errors _after_ publishing an article anyway. If you ever see such an under-construction post, remember: This is Web 2.0 beta.
+* Some kind of *pagination* and/or *archive* - I found out I don't need it! Everything I tag "Index" will be on the front page. Just tag older messages like "2008-01" or "old" to make an archive.
