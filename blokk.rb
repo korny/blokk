@@ -55,7 +55,7 @@ module Blokk
     class Admin < Base; end
     
     class Post < Base
-      has_many :comments, :order => 'created_at ASC'
+      has_many :comments, -> { order 'created_at ASC' }
       validates_presence_of :title, :nickname
       validates_uniqueness_of :nickname
       def self.find_by_id_or_nickname id
@@ -147,9 +147,9 @@ module Blokk
     
     class Index < R '/', '/index', '/tag/()([-\w]*)', '/all()()', '/(rss)', '/(rss)/([-\w]+)'
       def get format = 'html', tag = 'Index'
-        @posts = Post.all :conditions => TAG_PATTERN.gsub('TAG', tag || ''), :order => 'created_at DESC'
+        @posts = Post.where(TAG_PATTERN.gsub('TAG', tag || '')).order('created_at DESC').all
         if format == 'rss'
-          @comments = Comment.all :order => 'created_at DESC', :include => :post if tag == 'comments'
+          @comments = Comment.order('created_at DESC').includes(:post).all if tag == 'comments'
           rss = ::RSS.feed :title => "(almost) murphy.de#{' - comments' if @comments}",
             :about => "#{PAGE_URL}/rss", :link => PAGE_URL,
             :description => 'Kornelius Kalnbach @ Berlin, Germany',
