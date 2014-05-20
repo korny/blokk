@@ -8,8 +8,6 @@ h2. History
 
 I began writing the application that runs this blog on 2008-01-13, shortly after exploring "Camping":http://camping.rubyforge.org/, _why's extremely small web framework (which has only 4KB of code). I was amazed how easy it is to create a web application with it.
 
-----
-
 @blokk@ is derived from the "original blog.rb example":http://code.whytheluckystiff.net/camping/browser/trunk/examples/blog.rb.
 
 Try it yourself! It's really fun to work with Camping - but only if you know "Ruby":http://ruby-lang.org.
