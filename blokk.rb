@@ -1,57 +1,16 @@
-%w(camping/session coderay coderay/for_redcloth ./feed).each { |lib| require lib }
-
-# fix unicode urls
-# $KCODE = 'u'
+%w(camping camping/session coderay coderay/for_redcloth ./feed).each { |lib| require lib }
 
 Camping.goes :Blokk
 
-# TODO: safe Textile for comments
 # TODO: fix Textile (produces improper HTML at times, < for example)
-# TODO: document
-# DONE: make this HTML 5 compatible
-# DONE: exclude numerical tags from the post tag list
-# DONE: RSS only lists posts with Index tag
-# DONE: Show admin links all the time, hide them with CSS
-# DONE: Redirect to requested page after login
-# DONE: Login link removed, logout redirects to Index
-# DONE: Fixed comment posting
 module Blokk
   VERSION = "1.0"
   PAGE_URL = 'http://murfy.de'
   
-  def service(*a)
-    # don't set any cookies unless necessary
-    def @cookies.[]=(k,v); end unless @env['PATH_INFO'] == self / '/login'
-    super(*a)
-  end
+  set :secret, 'Very secret text, which no-one else should know!'
+  include Camping::Session
   
   module Models
-    
-    Base.establish_connection :adapter => 'sqlite3', :database => File.dirname(__FILE__) + '/../murfy.db'
-    
-    class CreateTheBasics < V 1.0
-      def self.up
-        create_table :blokk_admins, :force => true do |table|
-          table.string :name, :password
-        end
-        print "Password for #{user = ENV['USER']}? "
-        Admin.create :name => user, :password => $stdin.gets.chomp
-        
-        create_table :blokk_posts, :force => true do |table|
-          table.string :title, :tags, :nickname
-          table.text :body
-          table.timestamps
-        end
-        
-        create_table :blokk_comments, :force => true do |table|
-          table.integer :post_id
-          table.string :username
-          table.text :body
-          table.datetime :created_at
-        end
-      end
-    end if false
-    
     class Admin < Base; end
     
     class Post < Base
@@ -59,7 +18,7 @@ module Blokk
       validates_presence_of :title, :nickname
       validates_uniqueness_of :nickname
       def self.find_by_id_or_nickname id
-        find :first, :conditions => ['id = ? OR nickname = ?', id, id]
+        where('id = ? OR nickname = ?', id, id).first
       end
     end
     
@@ -72,42 +31,62 @@ module Blokk
       attr_accessor :bot
     end
     
+    class CreateTheBasics < V 1.0
+      def self.up
+        create_table Admin.table_name do |table|
+          table.string :name, :password
+        end
+        print "Password for #{user = ENV['USER']}? "
+        Admin.create :name => user, :password => $stdin.gets.chomp
+        
+        create_table Post.table_name do |table|
+          table.string :title, :tags, :nickname
+          table.text :body
+          table.timestamps
+        end
+        
+        create_table Comment.table_name do |table|
+          table.integer :post_id
+          table.string :username
+          table.text :body
+          table.datetime :created_at
+        end
+      end
+    end
   end
   
   def self.create
-    # Camping::Models::Session.create_schema
-    # Models.create_schema :assume => (Blokk::Models::Post.table_exists? ? 1.0 : 0.0)
+    Blokk::Models.create_schema
   end
   
   module Helpers
     
-    # login system
     def current_user
-      @current_user ||= Models::Admin.find(@cookies.admin_id) unless @cookies.admin_id.blank?
-      #raise @cookies.inspect unless @current_user
+      @current_user ||= Models::Admin.find(@state.user_id) if @state.user_id
       @current_user
     end
     alias logged_in? current_user
     
     def login name, password = nil
       @current_user = Models::Admin.find_by_name_and_password name, password
-      @cookies.admin_id = @current_user ? @current_user.id : nil
+      @state.user_id = @current_user.try(:id)
     end
     
-    # menu bar
-    def menu target = nil
+    def logout
+      @current_user = @state.user_id = nil
+    end
+    
+    def toolbar target = nil
       if target
-        args = target.is_a?(Symbol) ? [] : [target]
-        for role, submenu in menu[target].sort_by { |k, v| [:visitor, :admin].index k }
+        for role, submenu in toolbar[target].sort_by { |k, v| [:visitor, :admin].index k }
           ul.menu.send(role) do
             submenu.each do |x|
               li { x[/\A\w+\z/] ? a(x, :href => '#') : x }
-              # li { x[/\A\w+\z/] ? a(x, :href => R(Controllers.const_get(x), *args)) : x }
             end
           end unless submenu.empty?
         end
       else
-        @menu ||= Hash.new { |h, k| h[k] = { :visitor => [], :admin => [] } }
+        @toolbar ||= Hash.new { |h, k| h[k] = { :visitor => [], :admin => [] } }
       end
     end
     
@@ -117,9 +96,8 @@ module Blokk
       label name.to_s, { :for => name }, options.merge(errors ? { :class => :error } : {})
     end
     
-    # find all tags
     def tags
-      Models::Post.all(:select => 'DISTINCT tags').map(&:tags).join(' ').strip.split(/\s+/).uniq
+      Models::Post.pluck(:tags).uniq.join(' ').strip.split(/\s+/).uniq
     end
     
     def slogan
@@ -128,16 +106,12 @@ module Blokk
     
   end
   
-  # beautiful HTML 5
-  class Mab
-    def initialize(assigns = {}, helpers = nil, &block)
-      super(assigns.merge(:indent => 2), helpers, &block)
-    end
-    def html5
-      self.tagset = Markaby::XHTMLStrict
-      declare! :DOCTYPE, :html
-      tag!(:html) { yield }
-      self
+  module Mab
+    include ::Mab::Indentation
+    alias :mab_done_without_super :mab_done
+    def mab_done(*args)
+      mab_done_without_super(*args)
+      super
     end
   end
   
@@ -215,17 +189,18 @@ module Blokk
       end
     end
     
-    class Login < R '/login', '/logout'
+    class Login < R '/login'
       def post
         login input.name, input.password
-        logged_in? && @env["HTTP_REFERER"][/\A#{PAGE_URL}/] ? redirect($') : get
+        logged_in? ? redirect(@env["HTTP_REFERER"] || Index) : get
       end
+    end
+    
+    class Logout < R '/logout'
       def get
         logged_in? ? (login(nil); redirect(Index)) : render(:login)
       end
     end
-    
-    Logout = Login
     
     # Lowest precedence to allow urls like /<nickname>
     class Read < R '/read/([-\w]+)', '/([-\w]+)'
@@ -236,7 +211,7 @@ module Blokk
       end
       def post id  # post comment
         @comment = Comment.create :post_id => id, :bot => input.bot,
-          :username => (name = input.name), :body => (comment = input.comment)
+          :username => (name = input.name), :body => input.comment
         redirect self / "/read/#{Post.find(id).nickname}?name=#{Rack::Utils.escape name}#comments"
       end
     end
@@ -246,22 +221,22 @@ module Blokk
   module Views
     
     def layout
-      html5 do
+      html do
         head do
+          meta :'http-equiv' => 'Content-Type', :content => 'text/html; charset=utf-8'
           title "(almost) murphy.de#{" - #{@post.title}" if @post}"
           link :rel => 'stylesheet', :type => 'text/css', :href => self / '/main.css'
-          # link :rel => 'alternate stylesheet', :type => 'text/css', :title => 'Christmas Style', :href => self / '/main-xmas.css'
           link :rel => 'alternate', :type => 'application/rss+xml', :href => "/rss#{"/#@tag" if @tag != 'Index'}"
           link :rel => 'alternate', :type => 'application/rss+xml', :href => "/rss/comments"
           link :rel => 'shortcut icon', :type => 'image/x-icon', :href => '/murfy32.png'
         end
         body do
           div.header! do
-            h1 { a(:href => R(Index), :accesskey => 'I') { sup('(almost)') + span('murphy.de') } }
-            menu[:top][:visitor] = tags.sort.map { |t| a t, :href => self / "/tag/#{t}" }
-            menu[:top][:admin] << a('New', :href => self / "/new#{"/#@tag" if @tag != 'Index'}")
-            menu[:top][:admin] << 'Logout' if logged_in?
-            div.bar! { menu :top }
+            h1 { a(:href => R(Index), :accesskey => 'I') { sup('(almost)'); span('murphy.de') } }
+            toolbar[:top][:visitor] = tags.sort.map { |t| a(t, :href => self / "/tag/#{t}").to_s }
+            toolbar[:top][:admin] << a('New', :href => self / "/new#{"/#@tag" if @tag != 'Index'}").to_s
+            toolbar[:top][:admin] << a('Logout', :href => R(Logout)).to_s if logged_in?
+            div.bar! { toolbar :top }
           end
           div.slogan { RedCloth.new(slogan).to_html }
           div.content { self << yield }
@@ -269,7 +244,7 @@ module Blokk
             a("blokk #{VERSION}", :href => 'http://murfy.de/read/blokk')
             text(' | ')
             a("contact", :href => '/contact')
-            a.C! 'C', :href => 'http://camping.rubyforge.org', :title => 'powered by Camping'
+            a.C! 'C', :href => 'http://camping.io', :title => 'powered by Camping'
           end
         end
       end
@@ -329,29 +304,27 @@ module Blokk
           input :type => :submit, :value => 'Post! / Abschicken!',
             :onclick => "getElementById('bot').value='K'"
         end
-        # Later: Textile
-        # a 'use Textile', :href => 'http://whytheluckystiff.net/ruby/redcloth', :target => '0' if false
       end
     end
     
     # Partials
     def _post post, full = false, id = post.nickname || post.id
       div.post do
-        div.title { a post.title, :href => URL() + "/read/#{id.gsub(/ä|ö|ü/, '')}" }
+        div.title { a post.title, :href => self / "/read/#{id.gsub(/ä|ö|ü/, '')}" }
         div.subtitle do
           text "#{post.created_at.strftime('%a %Y-%m-%d')} "
-          text '(%s)' % post.tags.scan(/[a-z][-\w]+/i).map { |t|
-            a t[0,2], :title => t, :href => R(Index, t)
-          }.join
+          text! '( %s )' % post.tags.scan(/[a-z][-\w]+/i).map { |t|
+            a(t[0,2], :title => t, :href => R(Index, t)).to_s
+          }.join(' ')
         end
         excerpt, body = *post.body.split(/^---+/, 2)
-        div.body { text RedCloth.new("#{excerpt}#{body if full}").to_html }
-        div.more { a('Read... / Lesen...', :href => URL() + "/read/#{id.gsub(/ä|ö|ü/, '')}") } if body && !full
+        div.body { text! RedCloth.new("#{excerpt}#{body if full}").to_html }
+        div.more { a('Read... / Lesen...', :href => self / "/read/#{id.gsub(/ä|ö|ü/, '')}") } if body && !full
         cs = post.comments.size
-        menu[id][:visitor] << a("#{cs} comment#{'s' unless cs == 1}", :href => URL() + "/read/#{id.gsub(/ä|ö|ü/, '')}")
-        menu[id][:admin] << a('Edit', :href => URL() + "/edit/#{id.gsub(/ä|ö|ü/, '')}", :accesskey => ('E' if full))
-        menu[id][:admin] << a('Delete', :href => URL() + "/delete/#{id.gsub(/ä|ö|ü/, '')}")
-        menu id
+        toolbar[id][:visitor] << a("#{cs} comment#{'s' unless cs == 1}", :href => self / "/read/#{id.gsub(/ä|ö|ü/, '')}").to_s
+        toolbar[id][:admin] << a('Edit', :href => self / "/edit/#{id.gsub(/ä|ö|ü/, '')}", :accesskey => ('E' if full)).to_s
+        toolbar[id][:admin] << a('Delete', :href => self / "/delete/#{id.gsub(/ä|ö|ü/, '')}").to_s
+        toolbar id
       end
     end
     
@@ -391,5 +364,4 @@ module Blokk
     end
     
   end
-  
 end

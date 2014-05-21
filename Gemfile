@@ -1,4 +1,7 @@
 source "https://rubygems.org"
 
-gem 'camping-omnibus'
-gem 'markaby'
+gem 'camping', :github => 'camping/camping'
+gem 'activerecord'
+gem 'sqlite3'
+gem 'RedCloth'
+gem 'coderay'

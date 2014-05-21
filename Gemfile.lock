@@ -1,6 +1,15 @@
+GIT
+  remote: git://github.com/camping/camping.git
+  revision: 91b52da17cd8aa45f967f5f953e4e90f58780aa2
+  specs:
+    camping (2.1.570)
+      mab (>= 0.0.3)
+      rack (>= 1.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
+    RedCloth (4.2.9)
     activemodel (4.1.1)
       activesupport (= 4.1.1)
       builder (~> 3.1)
@@ -16,13 +25,7 @@ GEM
       tzinfo (~> 1.1)
     arel (5.0.1.20140414130214)
     builder (3.2.2)
-    camping (2.1.532)
-      mab (>= 0.0.3)
-      rack (>= 1.0)
-    camping-omnibus (2.1.523)
-      activerecord
-      camping (>= 2.1)
-      sqlite3 (>= 1.1.0.1)
+    coderay (1.1.0)
     i18n (0.6.9)
     json (1.8.1)
     mab (0.0.3)
@@ -37,4 +40,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  camping-omnibus
+  RedCloth
+  activerecord
+  camping!
+  coderay
+  sqlite3

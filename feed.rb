@@ -1,7 +1,6 @@
 require 'rss'
 
 module RSS
-  
   class MakerProxy < Struct.new :maker
     def item options
       maker.items.new_item do |item|
@@ -20,5 +19,4 @@ module RSS
       yield MakerProxy.new(maker)
     end
   end
-  
 end
