@@ -60,20 +60,18 @@ module Blokk
   end
   
   module Helpers
-    
-    def current_user
-      @current_user ||= Models::Admin.find(@state.user_id) if @state.user_id
-      @current_user
+    def logged_in?
+      @state.logged_in
     end
-    alias logged_in? current_user
     
-    def login name, password = nil
-      @current_user = Models::Admin.find_by_name_and_password name, password
-      @state.user_id = @current_user.try(:id)
+    def login name, password
+      if logged_in? == nil
+        @state.logged_in = Models::Admin.where(name: name, password: password).exists?
+      end
     end
     
     def logout
-      @current_user = @state.user_id = nil
+      @state.logged_in = nil
     end
     
     def toolbar target = nil
@@ -103,7 +101,6 @@ module Blokk
     def slogan
       Models::Post.find_by_nickname('slogan').body rescue ''
     end
-    
   end
   
   module Mab
@@ -156,7 +153,7 @@ module Blokk
     
     class New < R '/new', '/new/([-\w]*)'
       def get tag = nil
-        @post = Post.new :tags => "Index #{tag}".strip if logged_in?
+        @post = Post.new tags: "Index #{tag}".strip, nickname: @input.nickname if logged_in?
         render :new
       end
       include Poster
@@ -190,15 +187,19 @@ module Blokk
     end
     
     class Login < R '/login'
+      def get
+        logout; render(:login)
+      end
+      
       def post
         login input.name, input.password
-        logged_in? ? redirect(@env["HTTP_REFERER"] || Index) : get
+        logged_in? ? redirect(@env["HTTP_REFERER"].chomp('login') || Index) : get
       end
     end
     
     class Logout < R '/logout'
       def get
-        logged_in? ? (login(nil); redirect(Index)) : render(:login)
+        logout; redirect(Index)
       end
     end
     
@@ -207,7 +208,7 @@ module Blokk
       def get id  # read article
         @post = Post.find_by_id_or_nickname id
         @comment = Comment.new :username => input.name
-        render :view if @post
+        @post ? render(:view) : logged_in? ? redirect(New, nickname: id) : redirect('404.gif')
       end
       def post id  # post comment
         @comment = Comment.create :post_id => id, :bot => input.bot,
@@ -251,7 +252,7 @@ module Blokk
     end
     
     def index
-      p 'No posts yet / Hier steht noch nix.' if @posts.empty?
+      p { a('Log in', :href => R(Login)).to_s + ' to create posts.' } if @posts.empty?
       @posts.each { |post| _post post }
     end
     
@@ -269,7 +270,7 @@ module Blokk
     
     def delete
       login do
-        p { text 'Really delete %s?' % a(@post.title, :href => R(Read, @post.id)) }
+        p { text! 'Really delete %s?' % a(@post.title, :href => R(Read, @post.id)) }
         form :action => R(Delete), :method => :post do
           input :type => :hidden, :name => :id, :value => @post.id
           input :type => :submit, :value => 'Delete'
