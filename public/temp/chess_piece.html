@@ -1,0 +1,40 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Chess</title>
+    <style type="text/css" media="screen">
+      #canvas {
+/*        border: 1px solid black;*/
+      }
+      body {
+        margin: 0px;
+      }
+    </style>
+    <script src="shapes.js" type="text/javascript" charset="utf-8"></script>
+  </head>
+  <body>
+    <canvas height="640" width="640" id="canvas">No CANVAS.</canvas>
+    <script type="text/javascript" charset="utf-8">
+      var canvas = Shapes.initCanvas('canvas');
+      canvas.zoom(3);
+      var ctx = canvas;
+      ctx.fillStyle = 'black';
+      ctx.strokeStyle = 'black';
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      ctx.lineWidth = 1.5;
+      ctx.drawSVGPath('M 22.5,25 C 22.5,25 27,17.5 25.5,14.5 C 25.5,14.5 24.5,12 22.5,12 C 20.5,12 19.5,14.5 19.5,14.5 C 18,17.5 22.5,25 22.5,25');
+      ctx.drawSVGPath('M 11.5,37 C 17,40.5 27,40.5 32.5,37 L 32.5,30 C 32.5,30 41.5,25.5 38.5,19.5 C 34.5,13 25,16 22.5,23.5 L 22.5,27 L 22.5,23.5 C 19,16 9.5,13 6.5,19.5 C 3.5,25.5 11.5,29.5 11.5,29.5 L 11.5,37 z ');
+      ctx.drawSVGPath('M 22.5,11.625 L 22.5,6');
+      ctx.drawSVGPath('M 20,8 L 25,8');
+      ctx.strokeStyle = 'white';
+      ctx.fillStyle = 'transparent';
+      ctx.drawSVGPath('M 11.5,29.5 C 17,27 27,27 32.5,30');
+      ctx.drawSVGPath('M 11.5,37 C 17,34.5 27,34.5 32.5,37');
+      ctx.drawSVGPath('M 11.5,33.5 C 17,31.5 27,31.5 32.5,33.5');
+      ctx.drawSVGPath('M 32,29.5 C 32,29.5 40.5,25.5 38.025969,19.846552 C 34.147406,13.996552 25,18 22.5,24.5 L 22.511718,26.596552 L 22.5,24.5 C 20,18 9.9063892,13.996552 6.9974672,19.846552 C 4.5,25.5 11.845671,28.846552 11.845671,28.846552');
+    </script>
+  </body>
+</html>

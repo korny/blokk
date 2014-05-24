@@ -1,0 +1,38 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Chess</title>
+    <style type="text/css" media="screen">
+      body {
+        font-family: 'Trebuchet MS', Verdana, Arial, sans-serif;
+        margin: 0.5em;
+      }
+      #board-frame {
+        position: absolute;
+        border: 9px solid gray;
+/*        padding: 10px;*/
+      }
+      #pieces, #selection {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+      }
+    </style>
+    <script src="shapes.js" type="text/javascript" charset="utf-8"></script>
+    <script src="draw_engine.js" type="text/javascript" charset="utf-8"></script>
+    <script src="pieces.js" type="text/javascript" charset="utf-8"></script>
+    <script src="chess.js" type="text/javascript" charset="utf-8"></script>
+  </head>
+  <body>
+    <div id="board-frame">
+      <canvas id="board">Your browser doesn't support HTML 5 Canvas.</canvas>
+      <canvas id="pieces">Please install a better browser.</canvas>
+      <canvas id="selection">Firefox or Safari, for example.</canvas>
+    </div>
+    <script type="text/javascript" charset="utf-8">
+      if (!Prototype.Browser.IE) Game.initialize();
+    </script>
+  </body>
+</html>

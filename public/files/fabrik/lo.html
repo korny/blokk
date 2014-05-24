@@ -1,0 +1,111 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Lineare Optimierung - Übung</title>
+  </head>
+  <body>
+
+	<h1>Lineare Optimierung &#8211; Übung</h1>
+
+	<h2>Beispielaufgabe</h2>
+
+	<p>Autohersteller, zwei Modelle A, B</p>
+
+
+	<table>
+		<tr>
+			<th>Modell  </th>
+			<th>Montage </th>
+			<th>Endfertigung </th>
+			<th>Profit </th>
+			<th>Mindestzahl </th>
+		</tr>
+		<tr>
+			<td style="text-align:center;">A       </td>
+			<td style="text-align:right;">4h      </td>
+			<td style="text-align:right;">6h           </td>
+			<td> 400 €    </td>
+			<td style="text-align:center;">20          </td>
+		</tr>
+		<tr>
+			<td style="text-align:center;">B       </td>
+			<td style="text-align:right;">6h      </td>
+			<td style="text-align:right;">3h           </td>
+			<td> 300 €    </td>
+			<td style="text-align:center;">30          </td>
+		</tr>
+		<tr>
+			<td> Kapazität </td>
+			<td style="text-align:right;">720h    </td>
+			<td style="text-align:right;">480h         </td>
+			<td> max.     </td>
+			<td>&nbsp;</td>
+		</tr>
+	</table>
+
+
+
+	<h3>Modellierung</h3>
+
+<ul>
+	<li><img src="temp-7d3c6e3.png" style="vertical-align: middle; width: 19px; ;" title="$x_A$" alt="$x_A$" />: Anzahl Modell A</li>
+	<li><img src="temp-7d4cf24.png" style="vertical-align: middle; width: 18px; ;" title="$x_B$" alt="$x_B$" />: Anzahl Modell B</li>
+</ul>
+
+	<p><strong>Zielfunktion</strong>: <img src="temp-30265bf6.png" style="vertical-align: middle; width: 193px; ;" title="$f[x_A, x_b] = 400 x_A + 300 x_B$" alt="$f[x_A, x_b] = 400 x_A + 300 x_B$" /></p>
+
+
+	<p><strong>Restriktionen</strong></p>
+
+
+<ul>
+	<li><img src="temp-f4827939.png" style="vertical-align: middle; width: 208px; ;" title="$g_1[x_A_, x_B] = 4x_A + 6x_B - 720$" alt="$g_1[x_A_, x_B] = 4x_A + 6x_B - 720$" /></li>
+	<li><img src="temp-d2c32814.png" style="vertical-align: middle; width: 208px; ;" title="$g_2[x_A_, x_B] = 6x_A + 3x_B - 480$" alt="$g_2[x_A_, x_B] = 6x_A + 3x_B - 480$" /></li>
+	<li><img src="temp-f411a50f.png" style="vertical-align: middle; width: 145px; ;" title="$g_3[x_A_, x_B] = 20 - x_A$" alt="$g_3[x_A_, x_B] = 20 - x_A$" /></li>
+	<li><img src="temp-1eaa08ae.png" style="vertical-align: middle; width: 144px; ;" title="$g_4[x_A_, x_B] = 30 - x_B$" alt="$g_4[x_A_, x_B] = 30 - x_B$" /></li>
+</ul>
+
+	<p>gesuchtes Optimum: <img src="temp-1c7520d5.png" style="vertical-align: middle; width: 216px; ;" title="$\max \{ f[x_A, x_B] \mid [x_A, x_B] \in M \}$" alt="$\max \{ f[x_A, x_B] \mid [x_A, x_B] \in M \}$" /></p>
+
+
+	<h3>Vereinfachung</h3>
+
+<ul>
+	<li><img src="temp-deab8706.png" style="vertical-align: middle; width: 49px; ;" title="$x \ge 20$" alt="$x \ge 20$" /></li>
+	<li><img src="temp-30e012f4.png" style="vertical-align: middle; width: 48px; ;" title="$y \ge 30$" alt="$y \ge 30$" /></li>
+	<li><img src="temp-3232110e.png" style="vertical-align: middle; width: 104px; ;" title="$2x + 3y \le 360$" alt="$2x + 3y \le 360$" /></li>
+	<li><img src="temp-e23f2eca.png" style="vertical-align: middle; width: 96px; ;" title="$2x + y \le 160$" alt="$2x + y \le 160$" /></li>
+	<li>ZF <img src="temp-f484ffc0.png" style="vertical-align: middle; width: 152px; ;" title="$400x + 300y \to \max$" alt="$400x + 300y \to \max$" /></li>
+</ul>
+
+	<h3>Lösung</h3>
+
+	<p>Grafisch: <img src="temp-c0feb9ff.png" style="vertical-align: middle; width: 72px; ;" title="$S[30 / 100]$" alt="$S[30 / 100]$" /></p>
+
+
+	<h3>Interpretation</h3>
+
+Optimale Produktion:
+<ul>
+	<li>30 x Modell A</li>
+	<li>100 x Modell B</li>
+	<li>Gewinn: 42.000 €</li>
+</ul>
+
+	<h2>Aufgabe</h2>
+
+	<p>Zeigen Sie:</p>
+
+
+	<p style="text-align:center;"><img src="temp-fe0b19e9.png" style="vertical-align: middle; width: 307px; ;" title="\[K[x_o, r] = \{ x_0 \in \mathbb R_1 <x-x_0, x-x_0> \le r^2 \}\]" alt="\[K[x_o, r] = \{ x_0 \in \mathbb R_1 <x-x_0, x-x_0> \le r^2 \}\]" /></p>
+
+	<p>ist konvex.</p>
+
+
+	<p>Hinweis: Zeigen Sie<sup><a href="#fn1">1</a></sup>, dass</p>
+
+
+	<p style="text-align:center;"><img src="temp-1189c7c3.png" style="vertical-align: middle; width: 187px; ;" title="$\text{für alle } n \in \mathbb N^+, p, s \in \mathbb R^n$" alt="$\text{für alle } n \in \mathbb N^+, p, s \in \mathbb R^n$" /> gilt: <img src="temp-e2f1baf3.png" style="vertical-align: middle; width: 216px; ;" title="$<p,p> \cdot <s,s> \ge [<p,s>]^2$" alt="$<p,p> \cdot <s,s> \ge [<p,s>]^2$" />.</p>
+
+	<p id="fn1"><sup>1</sup> Ungleichung von Cauchy</p>

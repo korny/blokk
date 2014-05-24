@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Map Editor Demo</title>
+    <style type="text/css" media="screen">
+      body {
+        font-family: 'Trebuchet MS', Verdana, Arial, sans-serif;
+        margin: 0;
+      }
+      canvas#display, canvas#sprites {
+        position: absolute;
+        left: 16px;
+        top: 16px;
+      }
+      canvas#minimap,
+      canvas#minimap-sprites,
+      canvas#minimap-selection {
+        position: absolute;
+        left: 850px;
+        top: 16px;
+        cursor: crosshair;
+      }
+      #controls {
+        position: absolute;
+        right: 1em;
+        top: 330px;
+      }
+      ul#brush-choices {
+        padding: 0;
+        margin: 0;
+        list-style-type: none;
+      }
+      ul#brush-choices li {
+        cursor: pointer;
+        font-size: 0.8em;
+        float: left;
+        display: inline-block;
+        border: 1px solid black;
+        padding: 1px 3px;
+        margin-right: 3px;
+        text-indent: 0;
+      }
+    </style>
+    <script src="MersenneTwister19937class.js" type="text/javascript" charset="utf-8"></script>
+    <script src="random.js" type="text/javascript" charset="utf-8"></script>
+    <script src="shapes.js" type="text/javascript" charset="utf-8"></script>
+    <script src="map_editor.js" type="text/javascript" charset="utf-8"></script>
+  </head>
+  <body>
+    <canvas height="600" width="800" id="display">No CANVAS.</canvas>
+    <canvas height="600" width="800" id="sprites">No CANVAS.</canvas>
+    <canvas height="301" width="401" id="minimap">No CANVAS.</canvas>
+    <canvas height="301" width="401" id="minimap-sprites">No CANVAS.</canvas>
+    <canvas height="301" width="401" id="minimap-selection">No CANVAS.</canvas>
+    <div id="controls">
+      <ul id="brush-choices">
+        <li class="navajowhite">Desert 1</li>
+        <li class="blanchedalmond">Desert 2</li>
+        <li class="yellowgreen">Meadow</li>
+        <li class="snow">Snow</li>
+        <li class="silver">Stone</li>
+        <li class="green">Wood</li>
+        <li class="skyblue">Water</li>
+        <li class="gray">Rock</li>
+      </ul>
+      <br />
+      <label for="radius">brush size</label>
+      <input type="text" name="radius" value="5" size="3" id="radius" />
+      <ul>
+        <li>use the mouse to draw on the map</li>
+        <li>click on the matter buttons to select a new brush</li>
+        <li>change the brush size with 1-9 and 0</li>
+        <li>move the selection window with the arrow keys</li>
+      </ul>
+    </div>
+  </body>
+</html>

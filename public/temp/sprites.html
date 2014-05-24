@@ -1,0 +1,248 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Sprites</title>
+    <style type="text/css" media="screen">
+      body {
+        margin: 0;
+      }
+      canvas {
+        border: 2px solid black;
+        margin: 1em;
+      }
+    </style>
+    <script src="MersenneTwister19937class.js" type="text/javascript" charset="utf-8"></script>
+  </head>
+  <body>
+    <canvas height="600" width="800" id="canvas1" style="position: absolute">Your browser sucks.</canvas>
+    <canvas height="600" width="800" id="canvas2" style="position: absolute">Your browser sucks.</canvas>
+    <br />
+    <script type="text/javascript" charset="utf-8">//<![CDATA[
+    // random numbers
+    var Random = (function() {
+      var generator = new MersenneTwister19937;  // initialization to slow!
+      var random = {
+        init: function(seed) {
+          generator.init_genrand(seed);
+        },
+        nextFraction: function() {
+          return generator.genrand_real2();
+        },
+        next: function(n) {
+          return Math.floor(this.nextFraction() * n);
+        },
+        nextInRange: function(min, max) {
+          return min + this.nextFraction() * (max - min);
+        },
+        nextColor: function() {
+          return 'rgb(' +
+            this.next(255) + ',' +
+            this.next(255) + ',' +
+            this.next(255) + ')';
+        }
+      };
+      random.init(0);
+      return random;
+    })();
+    
+    // controls
+    var pause = false;
+    window.onkeydown = function(event) {
+      switch (event.keyCode) {
+        case 32: {  // space
+          pause = !pause;
+          break;
+        }
+        case 13: {  // return
+          break;
+        }
+        case 187: {  // +
+          break;
+        }
+        case 189: {  // -
+          break;
+        }
+        default: {
+          document.title += ' ' + event.keyCode;
+        }
+      }
+    }
+    
+    // fps counter
+    function fps() {
+      document.title = fps.originalTitle + ' - ' + fps.frames + ' fps';
+      if (fps.max) document.title += ' (of ' + fps.max + ')';
+      fps.frames = 0;
+    }
+    fps.frames = 0;
+    fps.max = 30;
+    fps.originalTitle = document.title;
+    setInterval(fps, 1000);
+    
+    function draw() {
+      var buildingsLayer = document.getElementById('canvas1');
+      if (!buildingsLayer.getContext) return;
+      var ctx = Shapes.getContext(buildingsLayer);
+      ctx.fillStyle = 'navajowhite';
+      ctx.fillRect(0, 0, buildingsLayer.width, buildingsLayer.height);
+      ctx.translate(400, 300);
+      drawTownHall(ctx, 0, 0);
+      drawGold(ctx, 300, 0);
+      drawGold(ctx, 380, 0);
+      drawGold(ctx, 340, 0);
+      drawGold(ctx, 340, 40);
+      drawGold(ctx, 300, 40);
+      drawGold(ctx, 300, 80);
+      drawGold(ctx, 340, 80);
+      drawTree(ctx, -300, 0);
+      drawTree(ctx, -340, 0);
+      drawTree(ctx, -300, 40);
+      drawTree(ctx, -260, 40);
+      drawTree(ctx, -300, -40);
+      ctx.lineWidth = 1;
+      
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(400, 100);
+      ctx.lineTo(0, 300);
+      ctx.strokeStyle = 'black';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.moveTo(400, 100);
+      ctx.lineTo(0, 300);
+      ctx.lineTo(400, 300);
+      ctx.lineTo(400, 100);
+      ctx.fillStyle = 'skyblue';
+      ctx.fill();
+      ctx.restore();
+      
+      var animationsLayer = document.getElementById('canvas2');
+      if (!animationsLayer.getContext) return;
+      ctx = Shapes.getContext(animationsLayer);
+      var frame = 0;
+      
+      var maxSpeed = 10;
+      var sprites = [];
+      for (var i = 0; i < 100; i++) {
+        var speed = Random.nextFraction() * (maxSpeed - 2) + 2;
+        var dir = Random.nextInRange(-Math.PI, Math.PI);
+        sprites[i] = {
+          x: Random.next(ctx.canvas.width),
+          y: Random.next(ctx.canvas.height),
+          dx: speed * Math.cos(dir),
+          dy: speed * Math.sin(dir),
+          color: Random.nextColor()
+        }
+      };
+      setInterval(function() {
+        var drawFrame;
+        if (!pause) {
+          ctx.clear();
+          ctx.save();
+          var w = ctx.canvas.width;
+          var h = ctx.canvas.height;
+            // ctx.translate(400, 300);
+            // for (var motionBlurFrame = -29; motionBlurFrame <= 0; motionBlurFrame++) {
+              drawFrame = frame;// + motionBlurFrame;
+              // ctx.globalAlpha = 1 / (Math.abs(motionBlurFrame) + 1);
+              // for (var i = 0; i < sprites.length; i++) {
+              //   var sprite = sprites[i];
+              //   ctx.clearRect(sprite.x - 11, sprite.y - 11, 22, 22);
+              // }
+              for (var i = 0; i < sprites.length; i++) {
+                var sprite = sprites[i];
+                sprite.x += sprite.dx;
+                sprite.y += sprite.dy;
+                ctx.drawCircle(sprite.x, sprite.y, 10, sprite.color, 'transparent');
+                ctx.drawCircle(sprite.x, sprite.y, 4, 'transparent', 'black');
+                if (sprite.x < 0) sprite.dx = -sprite.dx;
+                if (sprite.x > w) sprite.dx = -sprite.dx;
+                if (sprite.y < 0) sprite.dy = -sprite.dy;
+                if (sprite.y > h) sprite.dy = -sprite.dy;
+              };
+            // }
+          ctx.restore();
+          frame++;
+        }
+        fps.frames += 1;
+      }, 1000 / fps.max);
+    }
+    setTimeout(draw, 100);
+    //]]></script>
+
+    <script type="text/javascript" charset="utf-8">
+      Shapes = {
+        methods: {
+          clear: function(fillStyle) {
+            if (fillStyle) {
+              this.save();
+                this.fillStyle = fillStyle;
+                this.fillRect(0, 0, this.canvas.width, this.canvas.height);
+              this.restore();
+            }
+            else {
+              this.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+          },
+          drawRect: function(x, y, w, h, fillStyle, strokeStyle, lineWidth) {
+            this.save();
+              if (fillStyle) this.fillStyle = fillStyle;
+              if (strokeStyle) this.strokeStyle = strokeStyle;
+              if (lineWidth) this.lineWidth = lineWidth;
+              this.fillRect(x, y, w, h);
+              this.strokeRect(x, y, w, h);
+            this.restore();
+          },
+          drawSquare: function(x, y, w, fillStyle, strokeStyle, lineWidth) {
+            this.drawRect(x, y, w, w, fillStyle, strokeStyle, lineWidth);
+          },
+          drawCircle: function(x, y, radius, fillStyle, strokeStyle, lineWidth, startAngle, endAngle, anticlockwise) {
+            // sensible defaults
+            if (anticlockwise === undefined) anticlockwise = true;
+            if (startAngle === undefined) startAngle = 0;
+            if (endAngle === undefined) endAngle = Math.PI * 2;
+            this.save();
+              if (fillStyle) this.fillStyle = fillStyle;
+              if (strokeStyle) this.strokeStyle = strokeStyle;
+              if (lineWidth) this.lineWidth = lineWidth;
+              this.beginPath();
+              this.arc(x, y, radius, startAngle, endAngle, anticlockwise);
+              this.fill();
+              this.beginPath();
+              this.arc(x, y, radius, startAngle, endAngle, anticlockwise);
+              this.stroke();
+            this.restore();
+          },
+        },
+        getContext: function(canvas) {
+          var ctx = canvas.getContext('2d');
+          var methods = this.methods;
+          for (method in methods) {
+            ctx[method] = methods[method];
+          }
+          // ctx.canvas = canvas;
+          return ctx;
+        }
+      };
+
+      function drawTownHall(ctx, x, y) {
+        ctx.drawSquare(x - 50, y - 50, 100, 'navy', 'black', 2.0);
+        ctx.drawSquare(x - 40, y - 40, 80, 'blue', 'black', 2.0);
+        ctx.save();
+        ctx.drawSquare(x - 30, y - 30, 60, 'navy', 'black', 2.0);
+        ctx.rotate(Math.PI * 0.25);
+        ctx.drawSquare(x - 20, y - 20, 40, 'blue', 'black', 2.0);
+        ctx.restore();
+      }
+
+      function drawGold(ctx, x, y) {
+        ctx.drawCircle(x - 20, y - 20, 20, 'gold', 'gray', 2.0);
+      }
+      function drawTree(ctx, x, y) {
+        ctx.drawCircle(x - 10, y - 10, 15, 'green', 'darkgreen', 2.0);
+      }
+    </script>
+  </body>
+</html>

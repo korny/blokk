@@ -1,0 +1,362 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Canvas Test</title>
+    <style type="text/css" media="screen">
+      body {
+        margin: 0;
+      }
+    </style>
+    <script src="MersenneTwister19937class.js" type="text/javascript" charset="utf-8"></script>
+  </head>
+  <body onload="init();">
+    <canvas height="600" width="1000" id="canvas" title="Press SPACE to toggle deep space.">
+      Get a browser.
+    </canvas>
+    <canvas id="stars" style="display: none"></canvas>
+    <canvas id="stars2" style="display: none"></canvas>
+    <canvas id="hexgrid" style="display: none"></canvas>
+    <canvas id="panels" style="display: none"></canvas>
+    <script type="text/javascript" charset="utf-8">
+    
+    // random numbers
+    var Random = (function() {
+      var generator = new MersenneTwister19937;  // initialization to slow!
+      var random = {
+        init: function(seed) {
+          generator.init_genrand(seed);
+        },
+        next: function() {
+          return generator.genrand_real2();
+        }
+      };
+      random.init(0);
+      return random;
+    })();
+    
+    // mouse dragging
+    var offsetX = offsetY = 0;
+    var oldOffsetX = oldOffsetY = 0;
+    var startX = startY = 0;
+    function traceMouse(event) {
+      offsetX = (oldOffsetX - startX) + event.clientX;
+      offsetY = (oldOffsetY - startY) + event.clientY;
+      if (!stress) draw();
+    };
+    
+    // mouse moving
+    function cursorMovement(event) {
+      var x = event.clientX;
+      var y = event.clientY;
+      // col -= N/2
+      // row -= N/2  # row offset
+      // 
+      // row_height = N/4  # configure this!
+      // col_width = (row_height * PERFECT_HEXAGON).round
+      // hex_col = col / col_width  # column size factor
+      // row -= row_height / 2 if hex_col % 2 == 1  # odd row offset
+      // hex_row = row / row_height  # row size factor
+      // 
+      // # rectangle to hexagon magic
+      // x = col % col_width   # x inside the rectangle, from left
+      // y = row % row_height  # y inside the rectangle, from top
+      // w = (col_width * 2.0/3).ceil
+      // if x >= w
+      //   x -= w
+      //   fac = row_height / 2.0 / (col_width - w)
+      //   if x > (y / fac)
+      //     hex_col += 1
+      //     hex_row -= 1 if hex_col % 2 == 1
+      //   end
+      //   if x >= (row_height - y) / fac
+      //     hex_col += 1
+      //     hex_row += 1 if hex_col % 2 == 0
+      //   end
+      // end
+    };
+    
+    // viewport resized
+    window.onresize = function() {
+      initCanvas();
+      initPanels();
+      draw();
+    };
+    
+    // controls
+    var starsOn = false;
+    var stress = null;
+    window.onkeydown = function(event) {
+      switch (event.keyCode) {
+        case 32: {
+          starsOn = (starsOn + 1) % 3;
+          draw();
+          break;
+        }
+        case 13: {
+          if (stress) {
+            stress = clearInterval(stress);
+          }
+          else {
+            stress = setInterval(draw, 0);
+          }
+          break;
+        }
+      }
+    }
+    
+    // initialization
+    function init() {
+      initCanvas();
+      draw();
+      initStars('stars');
+      draw();
+      initStars('stars2');
+      draw();
+      initHexGrid();
+      draw();
+      initPanels();
+      draw();
+    }
+    function initCanvas() {
+      var canvas = document.getElementById('canvas');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      canvas.addEventListener('mousedown', function(event) {
+        startX = event.clientX;
+        startY = event.clientY;
+        oldOffsetX = offsetX;
+        oldOffsetY = offsetY;
+        canvas.addEventListener('mousemove', traceMouse, true);
+      }, true);
+      canvas.addEventListener('mouseup', function(event) {
+        canvas.removeEventListener('mousemove', traceMouse, true);
+      }, true);
+      canvas.addEventListener('mousemove', cursorMovement, true);
+    }
+    function initStars(id) {
+      var stars = document.getElementById(id);
+      var canvas = document.getElementById('canvas');
+      stars.width = canvas.width * 3;
+      stars.height = canvas.height * 3;
+      var ctx = stars.getContext('2d');
+      // ctx.fillStyle = 'black';
+      // ctx.fillRect(0, 0, stars.width, stars.height);
+      ctx.starPattern = starPattern;
+      ctx.starPattern();
+      stars.on = true;
+    }
+    function initHexGrid() {
+      var hexgrid = document.getElementById('hexgrid');
+      var canvas = document.getElementById('canvas');
+      hexgrid.width = canvas.width * 3;
+      hexgrid.height = canvas.height * 3;
+      var ctx = hexgrid.getContext('2d');
+      // ctx.fillStyle = 'blue';
+      // ctx.fillRect(0, 0, hexgrid.width, hexgrid.height);
+      ctx.hexagonPattern = hexagonPattern;
+      ctx.hexagonPattern(42);
+      hexgrid.on = true;
+    }
+    function initPanels() {
+      var panels = document.getElementById('panels');
+      var canvas = document.getElementById('canvas');
+      panels.width = canvas.width;
+      panels.height = canvas.height;
+      var ctx = panels.getContext('2d');
+      ctx.panels = drawPanels;
+      ctx.panels();
+      panels.on = true;
+    }
+    
+    // fps counter
+    function fps() {
+      document.title = fps.originalTitle + ' - ' + fps.frames + ' fps';
+      fps.frames = 0;
+    }
+    fps.frames = 0;
+    fps.originalTitle = document.title;
+    setInterval(fps, 1000);
+    
+    // hex grid
+    function hexagonPattern(hexSize) {
+      var colSize = hexSize * 1.5;
+      var rowSize = 2 * hexSize * Math.sin(Math.PI / 3);
+      var rowOffset = rowSize / 2;
+      var sizeX = Math.ceil(this.canvas.width / colSize);
+      var sizeY = Math.ceil(this.canvas.height / rowSize);
+      this.save();
+      this.lineWidth = 1;
+      this.strokeStyle = '#0f0';
+      this.hexagon = function (hexSize, full) {
+        this.save();
+        this.beginPath();
+        for(var i = full ? 6 : 3; i > 0; i--) {
+          this.moveTo(0, 0);
+          this.rotate(Math.PI/3);
+          this.translate(hexSize, 0);
+          this.lineTo(0, 0);
+          this.stroke();
+        }
+        this.restore();
+      };
+      for (var x = 0; x < sizeX; x++) {
+        for (var y = 0; y < sizeY; y++) {
+          this.save();
+          this.translate(x * colSize, y * rowSize);
+          if (x % 2 != 0) this.translate(0, rowOffset);
+          if (x == Math.round(sizeX / 2) && y == Math.round(sizeY / 2)) {
+            this.save()
+            this.strokeStyle = 'red';
+            this.lineWidth *= 1.5;
+            this.hexagon(hexSize, true);
+            this.restore();
+          }
+          else {
+            this.hexagon(hexSize);
+          }
+          this.restore();
+        };
+      };
+      if (this.fillText && false) {
+        this.fillStyle = 'white';
+        this.font = '20px sans-serif';
+        this.textBaseline = 'middle';
+        var text = ' n = ' + (2 * sizeX + 1) * (2 * sizeY + 1);
+        this.fillText(text, -colSize, rowSize/2);
+      }
+      this.restore();
+    }
+    
+    // random, static stars
+    function starPattern() {
+      this.save();
+      this.fillStyle = 'white';
+      for (var c = 0; c < 100; c++) {
+        try {
+          var color = Math.floor(Random.next() * 0x1000).toString(16);
+          while (color.length < 3) color = '0' + color;
+          this.fillStyle = '#' + color;
+        }
+        catch (boom) {
+          c--;
+          continue;
+        }
+        var i = document.getElementById('canvas').width * document.getElementById('canvas').height;
+        i /= 10000;
+        while (--i > 0) {
+          this.beginPath();
+          this.arc(
+            this.canvas.width * Random.next(),
+            this.canvas.height * Random.next(),
+            2 * Random.next(),
+            0, Math.PI*2, true);
+          this.fill();
+        }
+      }
+      this.restore();
+    }
+    
+    // GUI, sorta
+    function panel(title, x, y, w, h) {
+      var titleHeight = 15;
+      if (h < titleHeight) return;
+      this.save();
+      this.globalAlpha = 0.7;
+      this.fillRect(x, y, w, titleHeight);
+      this.globalAlpha = 0.5;
+      this.fillRect(x, y, w, h);
+      this.globalAlpha = 1;
+      this.strokeStyle = 'white';
+      this.strokeRect(x+0.5, y+0.5, w, titleHeight);
+      this.strokeRect(x+0.5, y+0.5, w, h);
+      if (this.fillText) {
+        this.font = titleHeight * 0.8 + 'px monospace';
+        this.fillStyle = 'black';
+        this.fillText(title, x + w/2 - this.measureText(title).width/2, y + titleHeight * 0.8);
+      }
+      this.restore();
+    }
+    
+    // generic panel
+    function drawPanels() {
+      this.save();
+      this.panel = panel;
+      this.fillStyle = 'white';
+      this.panel('Demo / Hexgrid', 5, 5, this.canvas.width - 11, 55);
+      this.fillStyle = '#4f4';
+      this.panel('Sidebar', 5, 65, 145, this.canvas.height - 70);
+      this.fillStyle = '#ff8';
+      this.panel('Incoming...', this.canvas.width - 381, 65, 225, 120);
+      this.fillStyle = '#8ff';
+      this.panel('Tools', this.canvas.width - 151, 65, 145, 285);
+      this.fillStyle = '#f8f';
+      this.panel('Tactics', this.canvas.width - 151, 355, 145, this.canvas.height - 455);
+      this.fillStyle = '#88f';
+      this.panel('Status report', 155, this.canvas.height - 95, this.canvas.width - 161, 90);
+      this.restore();
+    }
+    
+    // draw - compose scenery from all layers (stars, grid, panels)
+    function draw() {
+      var canvas = document.getElementById('canvas');
+      var ctx = canvas.getContext('2d');
+      
+      ctx.save();
+      ctx.fillStyle = 'black';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.restore();
+      
+      if (starsOn) {
+        var stars = document.getElementById('stars');
+        var starsRangeX = stars.width - canvas.width;
+        var starsRangeY = stars.height - canvas.height;
+        var stars2 = document.getElementById('stars2');
+        var offsetFactor;
+        if (starsOn >= 2 && stars2.on) {
+          offsetFactor = 0.3;
+          ctx.save();
+          ctx.globalAlpha = 0.2;
+          ctx.drawImage(stars2,
+            Math.min(Math.max(0, starsRangeX/2 - offsetX * offsetFactor), starsRangeX),
+            Math.min(Math.max(0, starsRangeY/2 - offsetY * offsetFactor), starsRangeY),
+            canvas.width, canvas.height,
+            0, 0, canvas.width, canvas.height);
+          ctx.restore();
+        }
+        if (starsOn >= 1 && stars.on) {
+          offsetFactor = 0.6;
+          ctx.save();
+          ctx.globalAlpha = 0.9;
+          ctx.drawImage(stars,
+            Math.min(Math.max(0, starsRangeX/2 - offsetX * offsetFactor), starsRangeX),
+            Math.min(Math.max(0, starsRangeY/2 - offsetY * offsetFactor), starsRangeY),
+            canvas.width, canvas.height,
+            0, 0, canvas.width, canvas.height);
+          ctx.restore();
+        }
+      }
+      
+      var hexgrid = document.getElementById('hexgrid');
+      if (hexgrid.on) {
+        offsetFactor = 1;
+        var hexgridRangeX = hexgrid.width - canvas.width;
+        var hexgridRangeY = hexgrid.height - canvas.height;
+        ctx.drawImage(hexgrid,
+          Math.min(Math.max(0, hexgridRangeX/2 - offsetX * offsetFactor), hexgridRangeX),
+          Math.min(Math.max(0, hexgridRangeY/2 - offsetY * offsetFactor), hexgridRangeY),
+          canvas.width, canvas.height,
+          0, 0, canvas.width, canvas.height);
+      }
+      
+      var panels = document.getElementById('panels');
+      if (panels.on) {
+        ctx.drawImage(panels, 0, 0);
+      }
+      
+      fps.frames += 1;
+    }
+    </script>
+  </body>
+</html>

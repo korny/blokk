@@ -1,0 +1,69 @@
+<notextile>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Lineare Optimierung - Übung</title>
+  </head>
+  <body>
+</notextile>
+
+h1. Lineare Optimierung - Übung
+
+h2. Beispielaufgabe
+
+Autohersteller, zwei Modelle A, B
+
+|_. Modell  |_. Montage |_. Endfertigung |_. Profit |_. Mindestzahl |
+|=. A       |>. 4h      |>. 6h           | 400 €    |=. 20          |
+|=. B       |>. 6h      |>. 3h           | 300 €    |=. 30          |
+| Kapazität |>. 720h    |>. 480h         | max.     |               |
+
+h3. Modellierung
+
+* $x_A$: Anzahl Modell A
+* $x_B$: Anzahl Modell B
+
+*Zielfunktion*: $f(x_A, x_b) = 400 x_A + 300 x_B$
+
+*Restriktionen*
+
+* $g_1(x_A_, x_B) = 4x_A + 6x_B - 720$
+* $g_2(x_A_, x_B) = 6x_A + 3x_B - 480$
+* $g_3(x_A_, x_B) = 20 - x_A$
+* $g_4(x_A_, x_B) = 30 - x_B$
+
+gesuchtes Optimum: $\max \{ f(x_A, x_B) \mid (x_A, x_B) \in M \}$
+
+h3. Vereinfachung
+
+* $x \ge 20$
+* $y \ge 30$
+* $2x + 3y \le 360$
+* $2x + y \le 160$
+* ZF $400x + 300y \to \max$
+
+h3. Lösung
+
+Grafisch: $S(30 / 100)$
+
+h3. Interpretation
+
+Optimale Produktion:
+* 30 x Modell A
+* 100 x Modell B
+* Gewinn: 42.000 €
+
+h2. Aufgabe
+
+Zeigen Sie:
+
+p=. $$K(x_o, r) = \{ x_0 \in \mathbb R_1 <x-x_0, x-x_0> \le r^2 \}$$
+
+ist konvex.
+
+Hinweis: Zeigen Sie[1], dass
+
+p=. $\text{für alle } n \in \mathbb N^+, p, s \in \mathbb R^n$ gilt: $<p,p> \cdot <s,s> \ge (<p,s>)^2$.
+
+fn1. Ungleichung von Cauchy

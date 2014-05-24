@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>beforeRunningCommand</key>
+	<string>saveActiveFile</string>
+	<key>bundleUUID</key>
+	<string>BB5D89CB-88E5-43C7-9549-304A5CFF5DBC</string>
+	<key>command</key>
+	<string>#!/usr/bin/env ruby
+require 'rubygems'
+begin
+  gem 'coderay', '&gt;=0.9.1'
+  require 'coderay'
+rescue LoadError
+  puts 'I need CodeRay 0.9 or higher. Please run "gem install coderay".'
+  exit
+end
+tokens = CodeRay.scan_file(ENV['TM_FILENAME'])
+puts "%d lines of %s code" % [tokens.loc, tokens.scanner.class.title]
+</string>
+	<key>input</key>
+	<string>selection</string>
+	<key>keyEquivalent</key>
+	<string>^@l</string>
+	<key>name</key>
+	<string>Count LOC</string>
+	<key>output</key>
+	<string>showAsTooltip</string>
+	<key>scope</key>
+	<string>source</string>
+	<key>uuid</key>
+	<string>228AF915-1449-4B85-B6FC-923D55721835</string>
+</dict>
+</plist>

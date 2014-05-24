@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<style type="text/css">
+
+	#frameRate
+	{
+		position: absolute;
+		right: 10px;
+		bottom: 10px;
+		z-index: 100;
+		font-size: 25px;
+		font-family: Arial, Helvetica, sans-serif;
+	}
+
+</style>
+
+<script type="text/javascript">
+
+var _lastTimeStamp = new Date().getTime();
+var _frameCount = 0;
+var _rateCounter;
+
+function fpsRateCounterUpdate()
+{
+	var currentTime = new Date().getTime();
+	
+	if (currentTime > _lastTimeStamp)
+	{
+		_rateCounter.innerText = Math.round(_frameCount * 1000 / (currentTime - _lastTimeStamp)) + " FPS";
+		_lastTimeStamp = currentTime;
+		_frameCount = 0;
+	}
+
+	setTimeout(fpsRateCounterUpdate, 1000);
+}
+
+window.addEventListener("load", function ()
+{
+	_rateCounter = document.getElementById("frameRate");
+	fpsRateCounterUpdate();
+}, false);
+
+var x = 250;
+var y = 250;
+var vspeed = 0;
+var ctx;
+
+var lastPoint = {x:0,y:0};
+var firstRun = true;
+var ctr = 0;
+
+function load()
+{
+	canvas = document.getElementById('canvas');
+	ctx = canvas.getContext("2d");
+	setInterval("ballLoop()",10);
+}
+
+function ballLoop()
+{
+	_frameCount ++;
+	
+	if ((y==500-33-20)) {
+		vspeed = -10;
+	}
+	y = y+vspeed;
+	
+	if (y<500-33-20) {
+		vspeed = vspeed + 0.5;
+	}else{
+		vspeed = 0;
+	}
+	
+	if (y>500-33-20) {
+		y=500-33-20;
+
+	}
+	//if (canvas.getContext) {
+		if (firstRun) {
+			ctx.clearRect(0, 0, 500, 600);
+			ctx.fillStyle = 'rgb(255,255,255)';
+			ctx.fillRect (0, 0, 500, 500);
+			
+			ctx.fillStyle = 'rgb(128,255,128)';
+			ctx.fillRect (0, 500-32, 500, 32);
+		} else {
+			ctx.fillStyle = 'rgb(255,255,255)';
+			ctx.fillRect (lastPoint.x - 21, lastPoint.y - 21, 42, 42);
+		}
+		
+		ctx.fillStyle = 'rgb(0,0,0)';
+		ctx.beginPath();
+		ctx.arc(x, y, 20, 0, Math.PI * 2, true);
+		ctx.fill();
+		
+		
+	//}
+	
+	lastPoint = {x:x, y:y};
+	firstRun = false;
+}
+</script>
+
+</head>
+<body onLoad="load();">
+
+<style> div#cdiv { border: 1px dotted #bbb; width: 500px; }</style>
+
+<div id="cdiv">
+   <canvas id="canvas" width="500" height="500">
+     <p>YOU YOU ARE NOT USING A BROWSER THAT SUPPORTS THE
+     <a href="http://www.w3.org/html/wg/html5/">HTML5</a>
+
+     &lt;canvas&gt; FEATURE.</p>
+   </canvas>
+</div>
+<div id="frameRate"></div>
+</body>
+</html>

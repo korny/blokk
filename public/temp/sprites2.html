@@ -1,0 +1,241 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Sprites</title>
+    <style type="text/css" media="screen">
+      body {
+        margin: 0;
+      }
+      canvas {
+        border: 2px solid black;
+        margin: 1em;
+      }
+    </style>
+    <script src="MersenneTwister19937class.js" type="text/javascript" charset="utf-8"></script>
+  </head>
+  <body>
+    <canvas height="600" width="800" id="display" style="position: absolute">No CANVAS.</canvas>
+    <canvas height="300" width="400" id="minimap" style="float: right">No CANVAS.</canvas>
+    <br />
+    <script type="text/javascript" charset="utf-8">//<![CDATA[
+    
+    // random numbers
+    var Random = (function() {
+      var generator = new MersenneTwister19937;  // initialization to slow!
+      var random = {
+        init: function(seed) {
+          generator.init_genrand(seed);
+        },
+        nextFraction: function() {
+          return generator.genrand_real2();
+        },
+        next: function(n) {
+          return Math.floor(this.nextFraction() * n);
+        },
+        nextInRange: function(min, max) {
+          return min + this.nextFraction() * (max - min);
+        },
+        nextColor: function() {
+          return 'rgb(' +
+            this.next(255) + ',' +
+            this.next(255) + ',' +
+            this.next(255) + ')';
+        }
+      };
+      random.init(0);
+      return random;
+    })();
+    
+    // controls
+    var pause = false;
+    window.onkeydown = function(event) {
+      switch (event.keyCode) {
+        case 32: {  // space
+          pause = !pause;
+          break;
+        }
+        case 13: {  // return
+          break;
+        }
+        case 187: {  // +
+          break;
+        }
+        case 189: {  // -
+          break;
+        }
+        default: {
+          document.title += ' ' + event.keyCode;
+        }
+      }
+    }
+    
+    function setTitle(text) {
+      document.title = setTitle.originalTitle + text;
+    }
+    setTitle.originalTitle = document.title;
+    
+    // fps counter
+    function fps() {
+      var text = fps.originalTitle + ' - ' + fps.frames + ' fps';
+      if (fps.max) text += ' (of ' + fps.max + ')';
+      setTitle(text);
+      fps.frames = 0;
+    }
+    fps.frames = 0;
+    fps.currentFrame = 0;
+    fps.max = 30;
+    setInterval(fps, 1000);
+    
+    function init() {
+      var display = initDisplay('display');
+      var minimap = initMinimap('minimap');
+      var sprites = initSprites({ count: 100, maxSpeed: 10, canvas: display.canvas });
+      startDrawInterval(drawSprites, { 'sprites': sprites, target: display });
+    }
+    setTimeout(init, 100);
+    //]]>
+    </script>
+
+    <script type="text/javascript" charset="utf-8">
+    function initDisplay(id) {
+      var display = document.getElementById(id);
+      if (!display.getContext) return;
+      var ctx = Shapes.getContext(display);
+      ctx.fillStyle = 'navajowhite';
+      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      return ctx;
+    }
+    
+    function initMinimap(id) {
+      var minimap = document.getElementById(id);
+      if (!minimap.getContext) return;
+      var ctx = Shapes.getContext(minimap);
+      ctx.fillStyle = 'navajowhite';
+      ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+      return ctx;
+    }
+    
+    function initSprites(options) {
+      var sprites = [];
+      for (var i = 0; i < options.count; i++) {
+        var speed = Random.nextFraction() * (options.maxSpeed - 2) + 2;
+        var dir = Random.nextInRange(-Math.PI, Math.PI);
+        sprites[i] = {
+          x: Random.next(options.canvas.width),
+          y: Random.next(options.canvas.height),
+          dx: speed * Math.cos(dir),
+          dy: speed * Math.sin(dir),
+          color: Random.nextColor()
+        }
+      };
+      return sprites;
+    }
+    
+    function startDrawInterval(callback, options) {
+      setInterval(function() {
+        if (!pause) callback(options);
+        fps.frames++;
+      }, 1000 / fps.max);
+    }
+    
+    function drawSprites(options) {
+      var sprites = options.sprites;
+      var ctx = options.target;
+      ctx.clear();
+      ctx.save();
+      var w = ctx.canvas.width;
+      var h = ctx.canvas.height;
+      for (var i = 0; i < sprites.length; i++) {
+        var sprite = sprites[i];
+        // move
+        sprite.x += sprite.dx;
+        sprite.y += sprite.dy;
+        // bounce
+        if (sprite.x < 0) sprite.dx = -sprite.dx;
+        else if (sprite.x > w) sprite.dx = -sprite.dx;
+        if (sprite.y < 0) sprite.dy = -sprite.dy;
+        else if (sprite.y > h) sprite.dy = -sprite.dy;
+        // draw
+        ctx.drawCircle(sprite.x, sprite.y, 10, sprite.color, 'transparent');
+        ctx.drawCircle(sprite.x, sprite.y, 4, 'transparent', 'black');
+      };
+      ctx.restore();
+    }
+    
+    </script>
+
+    <script type="text/javascript" charset="utf-8">
+      Shapes = {
+        methods: {
+          clear: function(fillStyle) {
+            if (fillStyle) {
+              this.save();
+                this.fillStyle = fillStyle;
+                this.fillRect(0, 0, this.canvas.width, this.canvas.height);
+              this.restore();
+            }
+            else {
+              this.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+          },
+          drawRect: function(x, y, w, h, fillStyle, strokeStyle, lineWidth) {
+            this.save();
+              if (fillStyle) this.fillStyle = fillStyle;
+              if (strokeStyle) this.strokeStyle = strokeStyle;
+              if (lineWidth) this.lineWidth = lineWidth;
+              this.fillRect(x, y, w, h);
+              this.strokeRect(x, y, w, h);
+            this.restore();
+          },
+          drawSquare: function(x, y, w, fillStyle, strokeStyle, lineWidth) {
+            this.drawRect(x, y, w, w, fillStyle, strokeStyle, lineWidth);
+          },
+          drawCircle: function(x, y, radius, fillStyle, strokeStyle, lineWidth, startAngle, endAngle, anticlockwise) {
+            // sensible defaults
+            if (anticlockwise === undefined) anticlockwise = true;
+            if (startAngle === undefined) startAngle = 0;
+            if (endAngle === undefined) endAngle = Math.PI * 2;
+            this.save();
+              if (fillStyle) this.fillStyle = fillStyle;
+              if (strokeStyle) this.strokeStyle = strokeStyle;
+              if (lineWidth) this.lineWidth = lineWidth;
+              this.beginPath();
+              this.arc(x, y, radius, startAngle, endAngle, anticlockwise);
+              this.fill();
+              this.beginPath();
+              this.arc(x, y, radius, startAngle, endAngle, anticlockwise);
+              this.stroke();
+            this.restore();
+          },
+        },
+        getContext: function(canvas) {
+          var ctx = canvas.getContext('2d');
+          var methods = this.methods;
+          for (method in methods) {
+            ctx[method] = methods[method];
+          }
+          // ctx.canvas = canvas;
+          return ctx;
+        }
+      };
+
+      function drawTownHall(ctx, x, y) {
+        ctx.drawSquare(x - 50, y - 50, 100, 'navy', 'black', 2.0);
+        ctx.drawSquare(x - 40, y - 40, 80, 'blue', 'black', 2.0);
+        ctx.save();
+        ctx.drawSquare(x - 30, y - 30, 60, 'navy', 'black', 2.0);
+        ctx.rotate(Math.PI * 0.25);
+        ctx.drawSquare(x - 20, y - 20, 40, 'blue', 'black', 2.0);
+        ctx.restore();
+      }
+      function drawGold(ctx, x, y) {
+        ctx.drawCircle(x - 20, y - 20, 20, 'gold', 'gray', 2.0);
+      }
+      function drawTree(ctx, x, y) {
+        ctx.drawCircle(x - 10, y - 10, 15, 'green', 'darkgreen', 2.0);
+      }
+    </script>
+  </body>
+</html>

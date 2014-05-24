@@ -1,0 +1,182 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Shapes</title>
+    <style type="text/css" media="screen">
+      body {
+        margin: 0;
+      }
+      canvas {
+        border: 2px solid black;
+        margin: 1em;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas height="600" width="800" id="canvas1" style="position: absolute">Your browser sucks.</canvas>
+    <canvas height="600" width="800" id="canvas2" style="position: absolute">Your browser sucks.</canvas>
+    <br />
+    <script type="text/javascript" charset="utf-8">//<![CDATA[
+    // fps counter
+    function fps() {
+      document.title = fps.originalTitle + ' - ' + fps.frames + ' fps';
+      fps.frames = 0;
+    }
+    fps.frames = 0;
+    fps.max = 30;
+    fps.originalTitle = document.title;
+    setInterval(fps, 1000);
+    
+    function draw() {
+      var buildingsLayer = document.getElementById('canvas1');
+      if (!buildingsLayer.getContext) return;
+      var ctx = Shapes.getContext(buildingsLayer);
+      ctx.fillStyle = 'navajowhite';
+      ctx.fillRect(0, 0, buildingsLayer.width, buildingsLayer.height);
+      ctx.translate(400, 300);
+      drawTownHall(ctx, 0, 0);
+      drawGold(ctx, 300, 0);
+      drawGold(ctx, 380, 0);
+      drawGold(ctx, 340, 0);
+      drawGold(ctx, 340, 40);
+      drawGold(ctx, 300, 40);
+      drawGold(ctx, 300, 80);
+      drawGold(ctx, 340, 80);
+      drawTree(ctx, -300, 0);
+      drawTree(ctx, -340, 0);
+      drawTree(ctx, -300, 40);
+      drawTree(ctx, -260, 40);
+      drawTree(ctx, -300, -40);
+      ctx.lineWidth = 1;
+      
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(400, 100);
+      ctx.lineTo(0, 300);
+      ctx.strokeStyle = 'black';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.moveTo(400, 100);
+      ctx.lineTo(0, 300);
+      ctx.lineTo(400, 300);
+      ctx.lineTo(400, 100);
+      ctx.fillStyle = 'skyblue';
+      ctx.fill();
+      ctx.restore();
+      
+      var animationsLayer = document.getElementById('canvas2');
+      if (!animationsLayer.getContext) return;
+      ctx = Shapes.getContext(animationsLayer);
+      var frame = 0;
+      pagans = [
+        { x:  1, y: 3, color: 'lime' },
+        { x:  2, y: 3, color: 'red' },
+        { x: -1, y: 3, color: 'blue' },
+        { x:  0, y: 3, color: 'cyan' },
+        { x:  3, y: 2, color: 'purple' },
+        { x:  3, y: 1, color: 'orange' },
+        { x:  3, y: 0, color: 'white' },
+        { x:  3, y: 4, color: 'black' },
+        { x:  3, y: 5, color: 'yellow' },
+        { x:  3, y: -1, color: 'silver' },
+        { x:  3, y: -2, color: 'gray' }
+      ];
+      setInterval(function() {
+        var pagan, drawFrame;
+        ctx.clear();
+        ctx.save();
+          ctx.translate(400, 300);
+          for (var motionBlurFrame = -29; motionBlurFrame <= 0; motionBlurFrame++) {
+            drawFrame = frame + motionBlurFrame;
+            ctx.globalAlpha = 1 / (Math.abs(motionBlurFrame) + 1);
+            for (var i = 0; i < pagans.length; i++) {
+              pagan = pagans[i % pagans.length];
+              pagan.x = Math.sin(drawFrame/70 + i*i) * (20 - i);
+              pagan.y = Math.cos(drawFrame/132 + i*i) * (15 - i);
+              ctx.drawCircle(20 * pagan.x, 20 * pagan.y, 10, pagan.color, null, 0.01);
+            };
+          }
+        ctx.restore();
+        frame++;
+        fps.frames += 1;
+      }, 1000 / fps.max);
+    }
+    setTimeout(draw, 100);
+    //]]></script>
+
+    <script type="text/javascript" charset="utf-8">
+      Shapes = {
+        methods: {
+          clear: function(fillStyle) {
+            if (fillStyle) {
+              this.save();
+                this.fillStyle = fillStyle;
+                this.fillRect(0, 0, this.canvas.width, this.canvas.height);
+              this.restore();
+            }
+            else {
+              this.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+          },
+          drawRect: function(x, y, w, h, fillStyle, strokeStyle, lineWidth) {
+            this.save();
+              if (fillStyle) this.fillStyle = fillStyle;
+              if (strokeStyle) this.strokeStyle = strokeStyle;
+              if (lineWidth) this.lineWidth = lineWidth;
+              this.fillRect(x, y, w, h);
+              this.strokeRect(x, y, w, h);
+            this.restore();
+          },
+          drawSquare: function(x, y, w, fillStyle, strokeStyle, lineWidth) {
+            this.drawRect(x, y, w, w, fillStyle, strokeStyle, lineWidth);
+          },
+          drawCircle: function(x, y, radius, fillStyle, strokeStyle, lineWidth, startAngle, endAngle, anticlockwise) {
+            // sensible defaults
+            if (anticlockwise === undefined) anticlockwise = true;
+            if (startAngle === undefined) startAngle = 0;
+            if (endAngle === undefined) endAngle = Math.PI * 2;
+            this.save();
+              if (fillStyle) this.fillStyle = fillStyle;
+              if (strokeStyle) this.strokeStyle = strokeStyle;
+              if (lineWidth) this.lineWidth = lineWidth;
+              this.beginPath();
+              this.arc(x, y, radius, startAngle, endAngle, anticlockwise);
+              this.fill();
+              this.beginPath();
+              this.arc(x, y, radius, startAngle, endAngle, anticlockwise);
+              this.stroke();
+            this.restore();
+          },
+        },
+        getContext: function(canvas) {
+          var ctx = canvas.getContext('2d');
+          var methods = this.methods;
+          for (method in methods) {
+            ctx[method] = methods[method];
+          }
+          // ctx.canvas = canvas;
+          return ctx;
+        }
+      };
+
+      function drawTownHall(ctx, x, y) {
+        ctx.drawSquare(x - 50, y - 50, 100, 'navy', 'black', 2.0);
+        ctx.drawSquare(x - 40, y - 40, 80, 'blue', 'black', 2.0);
+        ctx.save();
+        ctx.drawSquare(x - 30, y - 30, 60, 'navy', 'black', 2.0);
+        ctx.rotate(Math.PI * 0.25);
+        ctx.drawSquare(x - 20, y - 20, 40, 'blue', 'black', 2.0);
+        ctx.restore();
+      }
+
+      function drawGold(ctx, x, y) {
+        ctx.drawCircle(x - 20, y - 20, 20, 'gold', 'gray', 2.0);
+      }
+      function drawTree(ctx, x, y) {
+        ctx.drawCircle(x - 10, y - 10, 15, 'green', 'darkgreen', 2.0);
+      }
+    </script>
+  </body>
+</html>

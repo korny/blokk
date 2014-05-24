@@ -1,0 +1,38 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Hexagon coordinates</title>
+    <style type="text/css" media="screen">
+      body {
+        font-family: 'Trebuchet MS', Verdana, Arial, sans-serif;
+        margin: 0;
+      }
+      #board-frame {
+        position: absolute;
+/*        border: 9px solid gray;*/
+/*        padding: 10px;*/
+      }
+      #grid, #selection {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        cursor: url(http://murfy.de/murfy.png), crosshair;
+      }
+    </style>
+    <script src="shapes.js" type="text/javascript" charset="utf-8"></script>
+    <script src="draw_engine.js" type="text/javascript" charset="utf-8"></script>
+    <script src="hexagon-coordinates.js" type="text/javascript" charset="utf-8"></script>
+  </head>
+  <body>
+    <div id="board-frame">
+      <canvas id="panel">Your browser doesn't support HTML 5 Canvas.</canvas>
+      <canvas id="grid">Please install a better browser.</canvas>
+      <canvas id="selection">Firefox or Safari, for example.</canvas>
+    </div>
+    <script type="text/javascript" charset="utf-8">
+      if (!Prototype.Browser.IE) Test.initialize();
+    </script>
+  </body>
+</html>
