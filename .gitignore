@@ -34,7 +34,6 @@ build/
 .rvmrc
 
 # ignore the public folder
-public/*
 log/*
 *.db
 /config/deploy
