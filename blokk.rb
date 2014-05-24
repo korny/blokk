@@ -300,8 +300,7 @@ module Blokk
           textarea.comment! '', :name => :comment, :cols => 60, :rows => 10
           input.bot! :type => :hidden, :name => :bot, :value => 'spambot'
           p 'No markup, just plain monospace text. / Kein Markup, nur Normschrift-Klartext.'
-          input :type => :submit, :value => 'Post! / Abschicken!',
-            :onclick => "getElementById('bot').value='K'"
+          input type: :submit, value: 'Post! / Abschicken!', onclick: "getElementById('bot').value='K'"
         end
       end
     end
@@ -320,8 +319,7 @@ module Blokk
         div.body { text! RedCloth.new("#{excerpt}#{body if full}").to_html }
         div.more { a('Read... / Lesen...', :href => self / "/read/#{id.gsub(/ä|ö|ü/, '')}") } if body && !full
         cs = post.comments.size
-        toolbar[id][:visitor] <<
-          a("#{cs} comment#{'s' unless cs == 1}", :href => self / "/read/#{id.gsub(/ä|ö|ü/, '')}").to_s
+        toolbar[id][:visitor] << a("#{cs} comment#{'s' unless cs == 1}", :href => self / "/read/#{id.gsub(/ä|ö|ü/, '')}").to_s
         toolbar[id][:admin] <<
           a('Edit', :href => self / "/edit/#{id.gsub(/ä|ö|ü/, '')}", :accesskey => ('E' if full)).to_s <<
           a('Delete', :href => self / "/delete/#{id.gsub(/ä|ö|ü/, '')}").to_s
