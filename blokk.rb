@@ -7,7 +7,7 @@ module Blokk
   VERSION = "1.0"
   PAGE_URL = 'http://murfy.de'
   
-  set :secret, 'Very secret text, which no-one else should know!'
+  set :secret, `openssl rand -hex 32`
   include Camping::Session
   
   module Models
@@ -23,11 +23,11 @@ module Blokk
     end
     
     class Comment < Base
+      belongs_to :post
       validates_presence_of :username
       validates_length_of :body, :within => 1..3000
       validates_inclusion_of :bot, :in => %w(K)
       validates_associated :post
-      belongs_to :post
       attr_accessor :bot
     end
     
@@ -56,7 +56,8 @@ module Blokk
   end
   
   def self.create
-    Blokk::Models.create_schema
+    Models.create_schema
+    Models::Base.establish_connection(:adapter => 'sqlite3', :database => './murfy.db')
   end
   
   module Helpers
@@ -115,7 +116,6 @@ module Blokk
   TAG_PATTERN = ["tags LIKE '% TAG %", 'TAG %', '% TAG', "TAG'"].join("' OR tags LIKE '")
   
   module Controllers
-    
     class Index < R '/', '/index', '/tag/()([-\w]*)', '/all()()', '/(rss)', '/(rss)/([-\w]+)'
       def get format = 'html', tag = 'Index'
         @posts = Post.where(TAG_PATTERN.gsub('TAG', tag || '')).order('created_at DESC').all
@@ -144,8 +144,7 @@ module Blokk
       def post id = nil
         return unless logged_in?
         @post = id.blank? ? Post.new : Post.find(id)
-        @post.update_attributes :title => input.title, :body => input.body,
-          :tags => input.tags, :nickname => input.nickname
+        @post.update_attributes @input
         return redirect Read, @post.nickname if @post.valid?
         render @post.new_record? ? :new : :edit
       end
@@ -173,7 +172,7 @@ module Blokk
         render :delete
       end
       def post
-        (@post = Post.find(input['id'])).destroy if logged_in?
+        (@post = Post.find(@input['id'])).destroy if logged_in?
         redirect Index
       end
     end
@@ -192,7 +191,7 @@ module Blokk
       end
       
       def post
-        login input.name, input.password
+        login @input.name, @input.password
         logged_in? ? redirect(@env["HTTP_REFERER"].chomp('login') || Index) : get
       end
     end
@@ -207,20 +206,18 @@ module Blokk
     class Read < R '/read/([-\w]+)', '/([-\w]+)'
       def get id  # read article
         @post = Post.find_by_id_or_nickname id
-        @comment = Comment.new :username => input.name
+        @comment = Comment.new :username => @input.name
         @post ? render(:view) : logged_in? ? redirect(New, nickname: id) : redirect('404.gif')
       end
       def post id  # post comment
-        @comment = Comment.create :post_id => id, :bot => input.bot,
-          :username => (name = input.name), :body => input.comment
+        @comment = Comment.create :post_id => id, :bot => @input.bot,
+          :username => (name = @input.name), :body => @input.comment
         redirect self / "/read/#{Post.find(id).nickname}?name=#{Rack::Utils.escape name}#comments"
       end
     end
-     
   end
   
   module Views
-    
     def layout
       html do
         head do
@@ -363,6 +360,5 @@ module Blokk
         end
       end
     end
-    
   end
 end
