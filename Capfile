@@ -9,3 +9,5 @@ require 'rvm1/capistrano3'
 
 # use bundler
 require 'capistrano/bundler'
+
+invoke :production
