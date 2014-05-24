@@ -37,3 +37,4 @@ build/
 public/*
 log/*
 *.db
+/config/deploy
