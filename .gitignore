@@ -35,3 +35,5 @@ build/
 
 # ignore the public folder
 public/*
+log/*
+*.db
