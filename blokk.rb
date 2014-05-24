@@ -1,10 +1,11 @@
+require 'bundler/setup'; Bundler.require unless defined? Bundler
 %w(camping camping/session coderay coderay/for_redcloth ./feed).each { |lib| require lib }
+
+# TODO: fix Textile (produces improper HTML at times, < for example)
 
 Camping.goes :Blokk
 
-# TODO: fix Textile (produces improper HTML at times, < for example)
 module Blokk
-  VERSION = "1.0"
   PAGE_URL = 'http://murfy.de'
   
   set :secret, `openssl rand -hex 32`
@@ -237,7 +238,7 @@ module Blokk
           div.slogan { RedCloth.new(slogan).to_html }
           div.content { self << yield }
           div.footer! do
-            a("blokk #{VERSION}", :href => 'http://murfy.de/read/blokk')
+            a("blokk 1.0", :href => 'http://murfy.de/read/blokk')
             text(' | ')
             a("contact", :href => '/contact')
             a.C! 'C', :href => 'http://camping.io', :title => 'powered by Camping'
