@@ -56,8 +56,10 @@ module Blokk
     end
   end
   
-  Models::Base.establish_connection(:adapter => 'sqlite3', :database => './murfy.db')
-  Models.create_schema
+  def self.create
+    Models::Base.establish_connection(:adapter => 'sqlite3', :database => './murfy.db')
+    Models.create_schema
+  end
   
   module Helpers
     def logged_in?
