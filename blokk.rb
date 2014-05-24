@@ -55,10 +55,8 @@ module Blokk
     end
   end
   
-  def self.create
-    Models.create_schema
-    Models::Base.establish_connection(:adapter => 'sqlite3', :database => './murfy.db')
-  end
+  Models::Base.establish_connection(:adapter => 'sqlite3', :database => './murfy.db')
+  Models.create_schema
   
   module Helpers
     def logged_in?
@@ -319,9 +317,11 @@ module Blokk
         div.body { text! RedCloth.new("#{excerpt}#{body if full}").to_html }
         div.more { a('Read... / Lesen...', :href => self / "/read/#{id.gsub(/ä|ö|ü/, '')}") } if body && !full
         cs = post.comments.size
-        toolbar[id][:visitor] << a("#{cs} comment#{'s' unless cs == 1}", :href => self / "/read/#{id.gsub(/ä|ö|ü/, '')}").to_s
-        toolbar[id][:admin] << a('Edit', :href => self / "/edit/#{id.gsub(/ä|ö|ü/, '')}", :accesskey => ('E' if full)).to_s
-        toolbar[id][:admin] << a('Delete', :href => self / "/delete/#{id.gsub(/ä|ö|ü/, '')}").to_s
+        toolbar[id][:visitor] <<
+          a("#{cs} comment#{'s' unless cs == 1}", :href => self / "/read/#{id.gsub(/ä|ö|ü/, '')}").to_s
+        toolbar[id][:admin] <<
+          a('Edit', :href => self / "/edit/#{id.gsub(/ä|ö|ü/, '')}", :accesskey => ('E' if full)).to_s <<
+          a('Delete', :href => self / "/delete/#{id.gsub(/ä|ö|ü/, '')}").to_s
         toolbar id
       end
     end
