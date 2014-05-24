@@ -37,3 +37,4 @@ build/
 log/*
 *.db
 /config/deploy
+/public/New_Zealand
